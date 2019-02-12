@@ -1,12 +1,17 @@
 # libpam_upn2sam
 
-Small module to in pam stack before libpam-krb5 to convert upn to sam account name.
+Small module to add in pam stack before libpam-krb5 to convert upn to sam account name.
 
+When the application (for example gdm3 / lightdm) get the upn for the
+user name.surname@example.com, this pam module sets PAM_USER as
+name.surname@USER.EXAMPLE.COM.
 
 
 # Work in progress
 
-Install libpam-dev.
+To compile you need `libpam-dev`.
+
+Then:
 
 ```bash
 gcc -fPIC -fno-stack-protector -c src/main.c 
