@@ -2,10 +2,15 @@
 
 Small module to add in pam stack before libpam-krb5 to convert upn to sam account name.
 
-When the application (for example gdm3 / lightdm) get the upn for the
-user name.surname@example.com, this pam module sets PAM_USER as
-name.surname@USER.EXAMPLE.COM.
+When the application (for example gdm3 / lightdm) gets the upn 
+(user principal name) for the user, this pam module sets PAM_USER as
+the corresponding sam account (good for kerberos authentication)
+(the username part is copied and not converted asking a ldapo server
+the possible changes from upn to sam).
 
+For example
+
+name.surname@example.com -> name.surname@USER.EXAMPLE.COM
 
 # Work in progress
 
