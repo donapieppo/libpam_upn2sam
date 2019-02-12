@@ -1,12 +1,13 @@
 # libpam_upn2sam
 
-Small module to add in pam stack before libpam-krb5 to convert upn to sam account name.
+Tiny module to add in pam stack before libpam-krb5 to convert upn to sam account name.
 
 When the application (for example gdm3 / lightdm) gets the upn 
 (user principal name) for the user, this pam module sets PAM_USER as
-the corresponding sam account (good for kerberos authentication)
-(the username part is copied and not converted asking a ldapo server
-the possible changes from upn to sam).
+the corresponding sam account (good for kerberos authentication).
+
+Note: actually the username part is copied and not converted asking a ldap server
+the possible changes from upn to sam.
 
 For example
 
@@ -37,6 +38,11 @@ auth  requisite     pam_deny.so
 auth  required      pam_exec.so     /usr/local/sbin/create_dsa_user
 auth  required      pam_permit.so
 ```
+
+## TODO
+
+Of course create a proper configuration. Now convert strings
+are hardcoded. Shameful but very simple to adapt.
 
 ## Thanks
 
