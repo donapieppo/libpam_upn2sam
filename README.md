@@ -46,7 +46,8 @@ are hardcoded. Shameful but very simple to adapt.
 
 ## Thanks
 
-[fedetask](https://github.com/fedetask) for his 
+Thanks to 
+[fedetask](https://github.com/fedetask) for his nice 
 [pam-tutorials](https://github.com/fedetask/pam-tutorials).
 
 
