@@ -13,6 +13,21 @@ For example
 
 name.surname@example.com -> name.surname@USER.EXAMPLE.COM
 
+# Configuration
+
+`/etc/libnss-upn2sam.conf` is the configuration file and contains 
+the upn domain and the kerberos realm separated by `:`.
+
+For example a file 
+
+```bash
+studio.example.com:STUDENTI.EXAMPLE.COM
+example.com:EXAMPLE.COM
+```
+
+tranforms the upn `name.surname@studio.example.com` in the sam accoun name
+`name.surname@STUDENTI.EXAMPLE.COM`.
+
 # Work in progress
 
 To compile you need `libpam-dev`.
