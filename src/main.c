@@ -11,8 +11,56 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_USERFILE_SIZE 1024
-#define USERSFILE "users"
+#define CONFFILE "/etc/libnss-upn2sam"
+#define BIG_ENOUGH 200 /* string lenght of domains */
+#define MAX_DOMAINS 10 /* max number of different domains */
+
+int parse_configuration(char domain_from[MAX_DOMAINS][BIG_ENOUGH], char domain_to[MAX_DOMAINS][BIG_ENOUGH]) {
+  FILE * fp;
+
+  int  domain_number = 0 ;
+
+  char ch;
+  int  ch_number = 0;
+  char *buf;
+
+  fp = fopen(CONFFILE,"r");
+
+  if (fp == NULL) {
+    perror("Error while opening the file.\n");
+    return(0);
+  }
+
+  buf = domain_from[domain_number];
+
+  while((ch = fgetc(fp)) != EOF) {
+    if (ch_number ++ > BIG_ENOUGH) {
+      perror("Configuration file with too long lines.\n");
+      return(0);
+    }
+    if (ch == ':') {
+      /* end of domain_from, start with domain_to */
+      *buf = '\0';
+      buf = domain_to[domain_number];
+    } else if (ch == '\n') {
+      /* end of domain_to, restart with domain_from */
+      *buf = '\0';
+      if (domain_number++ > MAX_DOMAINS) {
+        perror("Too many domains.\n");
+        return(domain_number - 1);
+      }
+      buf = domain_from[domain_number];
+    } else {
+      /* keep copying */
+      *buf = ch;
+      buf++;
+    }
+  }
+
+  fclose(fp);
+
+  return(domain_number + 1);
+}
 
 /* Get the username part */
 /* upn2username("p.q@studio.unibo.it", res) */
@@ -30,14 +78,21 @@ void upn2username(const char *upn, char *username) {
 void upn2sam(const char *upn, char *sam) {
   char username[200];
 
+  char domain_from[MAX_DOMAINS][BIG_ENOUGH]; /* array of upn domains  */
+  char domain_to[MAX_DOMAINS][BIG_ENOUGH];   /* array of sams domains */
+
+  int domain_number = parse_configuration(domain_from, domain_to);
+
+  /* extract username from upn (upn=pippo.pluto@example.com username=pippo.pluto) */
   upn2username(upn, username);
 
-  if (strstr(upn, "@studio.unibo.it")) {
-    snprintf(sam, 200, "%s@STUDENTI.DIR.UNIBO.IT\0", username);
-  } else if (strstr(upn, "@unibo.it")) {
-    snprintf(sam, 200, "%s@PERSONALE.DIR.UNIBO.IT\0", username);
-  } else {
-    strcpy(sam, upn);
+  /* search for domain in upn and change */
+  for (int i=0; i<domain_number; i++) {
+    if (strstr(upn, domain_from[i])) {
+      snprintf(sam, 200, "%s@%s\0", username, domain_to[i]);
+    } else {
+      strcpy(sam, upn);
+    }
   }
 }
 
