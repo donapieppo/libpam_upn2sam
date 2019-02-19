@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define CONFFILE "/etc/libnss-upn2sam.conf"
+#define CONFFILE "/etc/libpam-upn2sam.conf"
 #define BIG_ENOUGH 200 /* string lenght of domains */
 #define MAX_DOMAINS 10 /* max number of different domains */
 
