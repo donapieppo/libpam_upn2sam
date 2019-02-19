@@ -15,7 +15,7 @@ name.surname@example.com -> name.surname@USER.EXAMPLE.COM
 
 # Configuration
 
-`/etc/libnss-upn2sam.conf` is the configuration file and contains 
+`/etc/libpam-upn2sam.conf` is the configuration file and contains 
 the upn domains and the corresponding kerberos realms separated by `:`.
 
 For example a file 
