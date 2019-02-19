@@ -28,7 +28,7 @@ example.com:EXAMPLE.COM
 tranforms the upn `name.surname@studio.example.com` in the sam accoun name
 `name.surname@STUDENTI.EXAMPLE.COM`.
 
-# Work in progress
+# INSTALLATION
 
 To compile you need `libpam-dev`.
 
@@ -53,11 +53,6 @@ auth  requisite     pam_deny.so
 auth  required      pam_exec.so     /usr/local/sbin/create_dsa_user
 auth  required      pam_permit.so
 ```
-
-## TODO
-
-Of course create a proper configuration. Now convert strings
-are hardcoded. Shameful but very simple to adapt.
 
 ## Thanks
 
