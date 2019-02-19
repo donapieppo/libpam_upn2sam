@@ -59,7 +59,12 @@ int parse_configuration(char domain_from[MAX_DOMAINS][BIG_ENOUGH], char domain_t
 
   fclose(fp);
 
-  return(domain_number + 1);
+  syslog(LOG_DEBUG, "pam upn2sam has got %d domains\n", domain_number);
+  for (int i=0; i<domain_number; i++) {
+    syslog(LOG_DEBUG, "pam upn2sam has got domain_from=%s -> domain_to=%s\n", domain_from[i], domain_to[i]);
+  }
+
+  return(domain_number);
 }
 
 /* Get the username part */
@@ -86,13 +91,14 @@ void upn2sam(const char *upn, char *sam) {
   /* extract username from upn (upn=pippo.pluto@example.com username=pippo.pluto) */
   upn2username(upn, username);
 
+  /* copy for default (in case of no domanin found) */
+  strcpy(sam, upn);
+
   /* search for domain in upn and change */
   for (int i=0; i<domain_number; i++) {
     if (strstr(upn, domain_from[i])) {
       snprintf(sam, 200, "%s@%s\0", username, domain_to[i]);
-    } else {
-      strcpy(sam, upn);
-    }
+    } 
   }
 }
 
@@ -107,18 +113,21 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc,
 	const char *upn = NULL;
 	char sam[200];
 
+	setlogmask (LOG_UPTO (LOG_DEBUG));
 	pam_code = pam_get_user(handle, &upn, "USERNAME: ");
 
 	if (pam_code != PAM_SUCCESS) {
 		fprintf(stderr, "Can't get upn\n");
 		return PAM_PERM_DENIED;
 	} else {
-		fprintf(stderr, "pam dsa has got upn=%s\n", upn);
+		fprintf(stderr, "pam upn2sam has got upn=%s\n", upn);
 	}
 
-	syslog(LOG_AUTH|LOG_DEBUG, "pam dsa has got upn=%s\n", upn);
+	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got upn=%s\n", upn);
 
 	upn2sam(upn, sam);
+
+	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got sam=%s\n", sam);
 	pam_set_item(handle, PAM_USER, sam);
 
 	return PAM_SUCCESS;
