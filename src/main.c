@@ -71,7 +71,7 @@ int parse_configuration(char domain_from[MAX_DOMAINS][BIG_ENOUGH], char domain_t
 /* upn2username("p.q@studio.unibo.it", res) */
 /* res = 'p.q' */
 void upn2username(const char *upn, char *username) {
-  for (int i=0; i<200; i++) {
+  for (int i=0; i<BIG_ENOUGH; i++) {
     if (upn[i] == '@') {
       username[i] = '\0';
       break;
@@ -81,7 +81,7 @@ void upn2username(const char *upn, char *username) {
 }
 
 void upn2sam(const char *upn, char *sam) {
-  char username[200];
+  char username[BIG_ENOUGH];
 
   char domain_from[MAX_DOMAINS][BIG_ENOUGH]; /* array of upn domains  */
   char domain_to[MAX_DOMAINS][BIG_ENOUGH];   /* array of sams domains */
@@ -97,7 +97,7 @@ void upn2sam(const char *upn, char *sam) {
   /* search for domain in upn and change */
   for (int i=0; i<domain_number; i++) {
     if (strstr(upn, domain_from[i])) {
-      snprintf(sam, 200, "%s@%s\0", username, domain_to[i]);
+      snprintf(sam, BIG_ENOUGH, "%s@%s\0", username, domain_to[i]);
     } 
   }
 }
@@ -111,7 +111,7 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc,
 {
 	int pam_code;
 	const char *upn = NULL;
-	char sam[200];
+	char sam[BIG_ENOUGH];
 
 	setlogmask (LOG_UPTO (LOG_DEBUG));
 	pam_code = pam_get_user(handle, &upn, "USERNAME: ");
