@@ -25,8 +25,9 @@ studio.example.com:STUDENTI.EXAMPLE.COM
 example.com:EXAMPLE.COM
 ```
 
-tranforms the upn `name.surname@studio.example.com` in the sam accoun name
-`name.surname@STUDENTI.EXAMPLE.COM`.
+transforms the upn `name.surname@studio.example.com` in the sam accoun name
+`name.surname@STUDENTI.EXAMPLE.COM` when the module il called with direct
+param.
 
 # INSTALLATION
 
@@ -46,10 +47,11 @@ in `/etc/pam.d/lightdm`
 the auth part can be
 
 ```bash
-auth  required      pam_upn2sam.so
+auth  required      pam_upn2sam.so direct
 auth  [success=2 default=ignore]  pam_krb5.so minimum_uid=1000
 auth  [success=1 default=ignore]  pam_unix.so nullok_secure try_first_pass
 auth  requisite     pam_deny.so
+auth  required      pam_upn2sam.so reverse
 auth  required      pam_exec.so     /usr/local/sbin/create_dsa_user
 auth  required      pam_permit.so
 ```
