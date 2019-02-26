@@ -62,9 +62,9 @@ int parse_configuration(char domain_from[MAX_DOMAINS][BIG_ENOUGH], char domain_t
 
 	fclose(fp);
 
-	syslog(LOG_DEBUG, "pam upn2sam has got %d domains\n", domain_number);
+	syslog(LOG_DEBUG, "pam upn2sam read %d domains from conf file.\n", domain_number);
 	for (int i=0; i<domain_number; i++) {
-		syslog(LOG_DEBUG, "pam upn2sam has got domain_from=%s -> domain_to=%s\n", domain_from[i], domain_to[i]);
+		syslog(LOG_DEBUG, "pam upn2sam read domain_from=%s -> domain_to=%s\n", domain_from[i], domain_to[i]);
 	}
 
 	return(domain_number);
@@ -99,8 +99,11 @@ void upn2sam(const char *upn, char *sam) {
 
 	/* search for domain in upn and change */
 	for (int i=0; i<domains_count; i++) {
+		/* strstr('name.surname@example.com', 'example.com') */
+		/* first find, put smaller realms after long realms in config :-) */
 		if (strstr(upn, domain_from[i])) {
 			snprintf(sam, 200, "%s@%s\0", username, domain_to[i]);
+			break;
 		} 
 	}
 }
@@ -121,19 +124,20 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
 		fprintf(stderr, "Can't get provided_pam_user\n");
 		return PAM_PERM_DENIED;
 	} else {
-		fprintf(stderr, "pam upn2sam has got provided_pam_user=%s\n", provided_pam_user);
+		fprintf(stderr, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
 	}
 
-	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got provided_pam_user=%s\n", provided_pam_user);
+	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
 
 	if (argc == 1) {
-		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got argv=--%s--", argv[0]);
+		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam called with argv=%s", argv[0]);
 
 		if (strcmp(argv[0], "direct") == 0) {
-			syslog(LOG_DEBUG, "pam upn2sam in direct mode");
+			syslog(LOG_DEBUG, "pam upn2sam in direct mode upn2sam");
 			upn2sam(provided_pam_user, new_pam_user);
 			syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
 		} else {
+			syslog(LOG_DEBUG, "pam upn2sam in reverse model upn2username");
 			upn2username(provided_pam_user, new_pam_user);
 		}
 		pam_set_item(handle, PAM_USER, new_pam_user);
