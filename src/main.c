@@ -29,7 +29,7 @@ int parse_configuration(char domain_from[MAX_DOMAINS][BIG_ENOUGH], char domain_t
 	int  ch_number = 0;
 	char *buf;
 
-	if ((fp = fopen(file, "r")) == NULL)	
+	if ((fp = fopen(CONFFILE, "r")) == NULL) {	
 		perror("Error while opening the file.\n");
 		return(0);
 	}
@@ -109,9 +109,7 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const cha
 	return PAM_SUCCESS;
 }
 
-PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc,
-		const char **argv)
-{
+PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, const char **argv) {
 	int pam_code;
 	const char *provided_pam_user = NULL;
 	char new_pam_user[200];
@@ -136,7 +134,7 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc,
 			upn2sam(provided_pam_user, new_pam_user);
 			syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
 		} else {
-	                upn2username(provided_pam_user, new_pam_user);
+			upn2username(provided_pam_user, new_pam_user);
 		}
 		pam_set_item(handle, PAM_USER, new_pam_user);
 	} else {
