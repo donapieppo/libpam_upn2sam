@@ -1,6 +1,7 @@
 # libpam_upn2sam
 
-Tiny module to add in pam stack before libpam-krb5 to convert upn to sam account name.
+Tiny module to add in pam stack before libpam-krb5 to convert upn to sam account name
+(so to use realm instead of "email domain").
 
 When the application (for example gdm3 / lightdm) gets the upn 
 (user principal name) for the user, this pam module sets PAM_USER as
@@ -12,6 +13,11 @@ the possible changes from upn to sam.
 For example
 
 name.surname@example.com -> name.surname@USER.EXAMPLE.COM
+
+When called with 'reverse' keyword it converts the sam account name
+to username
+
+name.surname@USER.EXAMPLE.COM -> name.username
 
 # Configuration
 
