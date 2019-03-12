@@ -121,13 +121,11 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
 	pam_code = pam_get_user(handle, &provided_pam_user, "USERNAME: ");
 
 	if (pam_code != PAM_SUCCESS) {
-		fprintf(stderr, "Can't get provided_pam_user\n");
+		syslog(LOG_AUTH, "Can't get provided_pam_user");
 		return PAM_PERM_DENIED;
 	} else {
-		fprintf(stderr, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
+		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
 	}
-
-	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
 
 	if (argc == 1) {
 		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam called with argv=%s", argv[0]);
@@ -135,11 +133,11 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
 		if (strcmp(argv[0], "direct") == 0) {
 			syslog(LOG_DEBUG, "pam upn2sam in direct mode upn2sam");
 			upn2sam(provided_pam_user, new_pam_user);
-			syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
 		} else {
 			syslog(LOG_DEBUG, "pam upn2sam in reverse model upn2username");
 			upn2username(provided_pam_user, new_pam_user);
 		}
+		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
 		pam_set_item(handle, PAM_USER, new_pam_user);
 	} else {
 		syslog(LOG_AUTH, "pam upn2sam please provide direct or reverse param");
