@@ -37,7 +37,7 @@ param.
 
 # INSTALLATION
 
-To compile you need `libpam-dev`.
+To compile you need `libpam-dev` (and `libcurl4-openssl-dev` for webservice version).
 
 Then:
 
@@ -46,6 +46,16 @@ gcc -fPIC -fno-stack-protector -c src/main.c
 
 ld -x --shared -o /lib/x86_64-linux-gnu/security/pam_upn2sam.so main.o
 ```
+
+or, for the version using a webservice:
+
+```bash
+gcc -fPIC -fno-stack-protector -c src/libpam_upn2sam_from_webservice.c 
+
+ld -x --shared -o /lib/x86_64-linux-gnu/security/pam_upn2sam_from_webservice.so libpam_upn2sam_from_webservice.o
+```
+
+
 ## Example
 
 in `/etc/pam.d/lightdm`
