@@ -13,7 +13,7 @@
 
 #include <curl/curl.h>
 
-#define WEBSERVICE "http://st-deposito1.virtlab.unibo.it:3000"
+#define WEBSERVICE "http://st-deposito1.virtlab.unibo.it:3000/pam_create"
 #define BIG_ENOUGH 200 /* string lenght of domains */
 #define MAX_DOMAINS 10 /* max number of different domains */
 
@@ -45,11 +45,25 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-void upn2sam(const char *upn, char *sam) {
+/* Get the username part */
+/* upn2username("p.q@studio.unibo.it", res) */
+/* res = 'p.q' */
+void upn2username(const char *upn, char *username) {
+	for (int i=0; i<BIG_ENOUGH; i++) {
+		if (upn[i] == '@') {
+			username[i] = '\0';
+			break;
+		}
+		username[i] = upn[i];
+	}
+}
+
+
+static int upn2sam(const char *upn, char *sam) {
   /* web service to call with param upn 
-     http://st-deposito1.virtlab.unibo.it:3000/upn=pietro.donatini@unibo.it */
+     http://st-deposito1.virtlab.unibo.it:3000/pam_create?upn=pietro.donatini@unibo.it */
   char url[256];
-  snprintf(url, sizeof url, "%s/upn=%s", WEBSERVICE, upn);
+  snprintf(url, sizeof url, "%s?upn=%s", WEBSERVICE, upn);
 
   syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam web service url=%s\n", url);
 
@@ -80,6 +94,7 @@ void upn2sam(const char *upn, char *sam) {
   }
   else {
     syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam web: result=%s\n", chunk.memory);
+    strncpy(sam, chunk.memory, BIG_ENOUGH);
   }
 
   /* cleanup curl stuff */
@@ -89,6 +104,13 @@ void upn2sam(const char *upn, char *sam) {
 
   /* we're done with libcurl, so clean it up */
   curl_global_cleanup();
+
+  return 0;
+}
+
+PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+	printf("Acct mgmt\n");
+	return PAM_SUCCESS;
 }
 
 PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv) {
@@ -119,7 +141,7 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
 			upn2sam(provided_pam_user, new_pam_user);
 		} else {
 			syslog(LOG_DEBUG, "pam upn2sam in reverse model upn2username");
-			/* TODO upn2username(provided_pam_user, new_pam_user); */
+			upn2username(provided_pam_user, new_pam_user);
 		}
 		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
 		pam_set_item(handle, PAM_USER, new_pam_user);
