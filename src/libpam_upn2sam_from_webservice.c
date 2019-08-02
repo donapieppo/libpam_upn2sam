@@ -27,7 +27,7 @@ struct ResponseStruct {
  * size     = number of indices
  * nmemb    = size of each index
  * userp    = any extra user data needed */
-static size_t
+  static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
@@ -50,16 +50,16 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
 /* example getArg('url', argc, argv) */
 static const char* getArg(const char* pName, int argc, const char** argv) {
-	int len = strlen(pName);
-	int i;
+  int len = strlen(pName);
+  int i;
 
-	for (i = 0; i < argc; i++) {
-		if (strncmp(pName, argv[i], len) == 0 && argv[i][len] == '=') {
-			// only give the part url part (after the equals sign)
-			return argv[i] + len + 1;
-		}
-	}
-	return 0;
+  for (i = 0; i < argc; i++) {
+    if (strncmp(pName, argv[i], len) == 0 && argv[i][len] == '=') {
+      // only give the part url part (after the equals sign)
+      return argv[i] + len + 1;
+    }
+  }
+  return 0;
 }
 
 
@@ -67,20 +67,20 @@ static const char* getArg(const char* pName, int argc, const char** argv) {
 /* upn2username("p.q@studio.unibo.it", res) */
 /* res = 'p.q' */
 void upn2username(const char *upn, char *username) {
-	for (int i=0; i<BIG_ENOUGH; i++) {
-		if (upn[i] == '@') {
-			username[i] = '\0';
-			break;
-		}
-		username[i] = upn[i];
-	}
+  for (int i=0; i<BIG_ENOUGH; i++) {
+    if (upn[i] == '@') {
+      username[i] = '\0';
+      break;
+    }
+    username[i] = upn[i];
+  }
 }
 
 
 static int upn2sam(const char *webserviceUrl, const char *upn, char *sam) {
   /* web service to call with param upn 
-     http://st-deposito1.virtlab.unibo.it:3000/pam_create?upn=pietro.donatini@unibo.it */
-  char url[256];
+http://st-deposito1.virtlab.unibo.it:3000/pam_create?upn=pietro.donatini@unibo.it */
+  char url[500];
   snprintf(url, sizeof url, "%s?upn=%s", webserviceUrl, upn);
   syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam web service url=%s\n", url);
 
@@ -88,7 +88,7 @@ static int upn2sam(const char *webserviceUrl, const char *upn, char *sam) {
   CURLcode res;
 
   struct ResponseStruct chunk;
-  
+
   chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
   chunk.size = 0;           /* no data at this point */
 
@@ -107,7 +107,7 @@ static int upn2sam(const char *webserviceUrl, const char *upn, char *sam) {
   /* check for errors */
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+        curl_easy_strerror(res));
   }
   else {
     syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam web: result=%s\n", chunk.memory);
@@ -126,55 +126,56 @@ static int upn2sam(const char *webserviceUrl, const char *upn, char *sam) {
 }
 
 PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	printf("Acct mgmt\n");
-	return PAM_SUCCESS;
+  printf("Acct mgmt\n");
+  return PAM_SUCCESS;
 }
 
 PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-	return PAM_SUCCESS;
+  return PAM_SUCCESS;
 }
 
 PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, const char **argv) {
-	int pam_code;
-	const char *provided_pam_user = NULL;
-	char new_pam_user[BIG_ENOUGH];
+  int pam_code;
+  const char *provided_pam_user = NULL;
+  char new_pam_user[BIG_ENOUGH];
   const char* webserviceUrl = NULL;
   const char* method = NULL;
 
   /* GET provided_pam_user */
-	setlogmask (LOG_UPTO (LOG_DEBUG));
-	pam_code = pam_get_user(handle, &provided_pam_user, "USERNAME: ");
+  setlogmask (LOG_UPTO (LOG_DEBUG));
+  pam_code = pam_get_user(handle, &provided_pam_user, "USERNAME: ");
 
-	if (pam_code != PAM_SUCCESS) {
-		syslog(LOG_AUTH, "Can't get provided_pam_user");
-		return PAM_PERM_DENIED;
-	} else {
-		syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
-	}
+  if (pam_code != PAM_SUCCESS) {
+    syslog(LOG_AUTH, "Can't get provided_pam_user");
+    return PAM_PERM_DENIED;
+  } else {
+    syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
+  }
 
-  method = getArg("url", argc, argv);
-	if (!method) {
-		return PAM_AUTH_ERR;
-	}
+  method = getArg("method", argc, argv);
+  if (!method) {
+    syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam please provide method param");
+    return PAM_AUTH_ERR;
+  }
 
-  syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam called with method=%s and  url=%s", method, webserviceUrl);
+  syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam called with method=%s", method);
 
-	if (strcmp(method, "direct") == 0) {
+  if (strcmp(method, "direct") == 0) {
     webserviceUrl = getArg("url", argc, argv);
-  	if (!webserviceUrl) {
-		  syslog(LOG_DEBUG, "pam upn2sam missing url param");
-  		return PAM_AUTH_ERR;
-  	}
-		syslog(LOG_DEBUG, "pam upn2sam in direct mode upn2sam");
-		upn2sam(webserviceUrl, provided_pam_user, new_pam_user);
-	} else {
-		syslog(LOG_DEBUG, "pam upn2sam in reverse model upn2username");
-		upn2username(provided_pam_user, new_pam_user);
-	}
-	syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
-	pam_set_item(handle, PAM_USER, new_pam_user);
+    if (!webserviceUrl) {
+      syslog(LOG_DEBUG, "pam upn2sam please provide url param");
+      return PAM_AUTH_ERR;
+    }
+    syslog(LOG_DEBUG, "pam upn2sam in direct mode upn2sam");
+    upn2sam(webserviceUrl, provided_pam_user, new_pam_user);
+  } else {
+    syslog(LOG_DEBUG, "pam upn2sam in reverse model upn2username");
+    upn2username(provided_pam_user, new_pam_user);
+  }
+  syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam has got new_pam_user=%s\n", new_pam_user);
+  pam_set_item(handle, PAM_USER, new_pam_user);
 
-	return PAM_SUCCESS;
+  return PAM_SUCCESS;
 }
 
 
