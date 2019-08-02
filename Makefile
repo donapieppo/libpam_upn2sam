@@ -10,4 +10,8 @@ pam_upn2sam.so: src/libpam_upn2sam_from_webservice.c
 install: pam_upn2sam.so
 	/bin/cp pam_upn2sam.so /lib/x86_64-linux-gnu/security
 
+test: src/test.c
+	$(CC) $(CFLAGS) -o $@ $< -lpam -lpam_misc
+		
+
 
