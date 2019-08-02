@@ -152,6 +152,10 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
     syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam: pam_get_user = PAM_SUCCESS for provided_pam_user=%s\n", provided_pam_user);
   }
 
+  if (strstr(provided_pam_user, "@") == NULL) {
+    return PAM_SUCCESS;
+  }
+
   method = getArg("method", argc, argv);
   if (!method) {
     syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam please provide method param");
