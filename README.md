@@ -74,8 +74,9 @@ auth  required      pam_permit.so
 
 ## Thanks
 
-Thanks to 
+Many thanks to 
 [fedetask](https://github.com/fedetask) for his nice 
-[pam-tutorials](https://github.com/fedetask/pam-tutorials).
-
+[pam-tutorials](https://github.com/fedetask/pam-tutorials)
+and to [beatgammit](https://github.com/beatgammit) for 
+[pam-http](https://github.com/beatgammit/pam-http).
 
