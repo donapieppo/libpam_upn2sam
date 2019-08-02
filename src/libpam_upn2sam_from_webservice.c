@@ -157,14 +157,14 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *handle, int flags, int argc, co
 		return PAM_AUTH_ERR;
 	}
 
-  webserviceUrl = getArg("url", argc, argv);
-	if (!webserviceUrl) {
-		return PAM_AUTH_ERR;
-	}
-
   syslog(LOG_AUTH|LOG_DEBUG, "pam upn2sam called with method=%s and  url=%s", method, webserviceUrl);
 
 	if (strcmp(method, "direct") == 0) {
+    webserviceUrl = getArg("url", argc, argv);
+  	if (!webserviceUrl) {
+		  syslog(LOG_DEBUG, "pam upn2sam missing url param");
+  		return PAM_AUTH_ERR;
+  	}
 		syslog(LOG_DEBUG, "pam upn2sam in direct mode upn2sam");
 		upn2sam(webserviceUrl, provided_pam_user, new_pam_user);
 	} else {
